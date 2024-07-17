@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta charset="utf8">
+    <title>Punycode</title>
+<style>
+:root { color-scheme: light dark; }
+body {
+    display: flex;
+    flex-flow: column nowrap;
+}
+.content {
+    display: flex;
+}
+.pane {
+    flex: 4;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: stretch;
+}
+.abar {
+    flex: 1;
+    margin: 1em;
+    display: flex;
+    flex-flow: column nowrap;
+    align-items: flex-start;
+}
+.coderr {
+    color: #f40;
+}
+.footnote {
+    margin-top: 2em;
+    font-size: smaller;
+}
+.footnote p {
+    max-width: 20rem;
+}
+textarea {
+    flex: 1;
+    min-height: 4rem;
+}
+button {
+    margin: 1em 0 0 0;
+    white-space: nowrap;
+}
+ul {
+    padding-inline-start: 1em;
+}
+.tgt:after { content: " ↓" }
+.tlt:after { content: " ↑" }
+.content { flex-flow: column nowrap; }
+@media screen and (width > 40em) {
+    .content { flex-flow: row nowrap; }
+    .tgt:after { content: " ⟩" }
+    .tlt:after { content: " ⟨" }
+}
+@media (prefers-color-scheme: dark) {
+    .footnote { color: #ccc; }
+}
+</style>
+</head>
+<body>
+
+<div class="content">
+
+<div class="pane">
+    <label for="tp">Plain text</label>
+    <textarea id="tp"></textarea>
+</div>
+
+<div class="abar">
+    <button id="btp" class="tgt">Encode</button>
+    <button id="btc" class="tlt">Decode</button>
+</div>
+
+<div class="pane">
+    <label for="tc">Punycode encoded</label>
+    <textarea id="tc"></textarea>
+    <div id="etc" class="coderr"></div>
+</div>
+
+</div>
+
+<div class="footnote">
+<p>This is just text encoding, unaware of domain names. For domain names, prepend <code>xn--</code>, and remove any invalid chars, like whitespace and punctuation.</p>
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Punycode">Punycode</a>
+<li><a href="https://www.rfc-editor.org/rfc/rfc3492.html">RFC 3492: Punycode</a>
+</ul>
+</div>
+
+<noscript>This page requires JavaScript</noscript>
+
+<script src="js/punycode.js"></script>
+
+<script>
+const _App = {};
+function setError(text) {
+    _App.code_errors.textContent = text ? ('error: ' + JSON.stringify(text)) : text;
+}
+function handlePlaintextInput() {
+    const text = _App.text_pane.value;
+    const code = punycode.encode(text);
+    _App.code_pane.value = code;
+    setError('');
+}
+function handleCodetextInput() {
+    const code = _App.code_pane.value;
+    try {
+        const text = punycode.decode(code);
+        _App.text_pane.value = text;
+        setError('');
+    }
+    catch (err) {
+        setError(err.message ? err.message : err);
+    }
+}
+function setup() {
+    const text_pane = document.querySelector('#tp');
+    const code_pane = document.querySelector('#tc');
+    const cerr_pane = document.querySelector('#etc');
+    _App.text_pane = text_pane;
+    _App.code_pane = code_pane;
+    _App.code_errors = cerr_pane;
+    text_pane.addEventListener('input', handlePlaintextInput);
+    code_pane.addEventListener('input', handleCodetextInput);
+    const btn_encode = document.querySelector('#btp');
+    const btn_decode = document.querySelector('#btc');
+    btn_encode.addEventListener('click', handlePlaintextInput);
+    btn_decode.addEventListener('click', handleCodetextInput);
+}
+
+window.addEventListener('DOMContentLoaded', setup);
+</script>
+
+</body>
+</html>
